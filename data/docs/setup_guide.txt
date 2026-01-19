@@ -1,0 +1,12 @@
+DevMate Setup Guide
+
+1. Clone the repository.
+2. Create a virtual environment: `python -m venv venv`.
+3. Activate the environment: `venv\Scripts\activate` (Windows).
+4. Install dependencies: `pip install -r requirements.txt`.
+5. Configure AWS credentials in `.env` file.
+6. Run the application: `streamlit run app.py`.
+
+Common Errors:
+- "No module named X": Run pip install again.
+- "Access Denied": Check AWS permissions for Bedrock.

@@ -1,0 +1,17 @@
+# Environment variables
+.env
+
+# Python compilation
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+env/
+
+# Vector Store (Local DB)
+faiss_index/
+
+# OS generated files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,8 @@
+streamlit
+boto3
+langchain==0.3.7
+langchain-community==0.3.7
+langchain-aws==0.2.0
+faiss-cpu
+python-dotenv
+pypdf
