@@ -113,9 +113,40 @@ with tab1:
         st.write(f"**Experience:** {exp}")
         
         st.divider()
-        st.subheader("Admin")
-        if st.button("🔄 Re-ingest Knowledge Base"):
-            with st.spinner("Ingesting documents..."):
+        st.subheader("Knowledge Base")
+        
+        # File Uploader
+        uploaded_files = st.file_uploader("Upload Docs (PDF, TXT, MD)", 
+                                        type=["pdf", "txt", "md"], 
+                                        accept_multiple_files=True)
+        
+        if uploaded_files:
+            if st.button("Submit & Process"):
+                save_path = "data/docs"
+                if not os.path.exists(save_path):
+                    os.makedirs(save_path)
+                    
+                with st.spinner("Saving and indexing..."):
+                    count = 0
+                    for uploaded_file in uploaded_files:
+                        try:
+                            file_path = os.path.join(save_path, uploaded_file.name)
+                            with open(file_path, "wb") as f:
+                                f.write(uploaded_file.getbuffer())
+                            count += 1
+                        except Exception as e:
+                            st.error(f"Error saving {uploaded_file.name}: {e}")
+                    
+                    if count > 0:
+                        try:
+                            from ingest_docs import ingest_docs
+                            ingest_docs()
+                            st.success(f"Successfully added {count} documents!")
+                        except Exception as e:
+                            st.error(f"Ingestion failed: {e}")
+                            
+        if st.button("🔄 Re-ingest All Custom Data"):
+             with st.spinner("Ingesting documents..."):
                 try:
                     from ingest_docs import ingest_docs
                     ingest_docs()
