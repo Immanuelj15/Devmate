@@ -6,72 +6,85 @@ st.set_page_config(page_title="DevMate", layout="wide")
 # Custom CSS for UI Polish
 st.markdown("""
 <style>
-    /* Global Styles - White Background */
+    /* Global Styles - Modern Dark Theme */
     .stApp {
-        background-color: #ffffff;
-        color: #333333;
+        background-color: #0e1117; /* Deep Charcoal */
+        color: #e6e6e6;
     }
     
-    /* Typography - Blue Headers */
+    /* Typography */
     h1, h2, h3 {
         font-family: 'Inter', sans-serif;
-        color: #0044cc !important; /* Strong Blue */
+        color: #58a6ff !important; /* GitHub Blue */
+    }
+    p, div, label {
+        color: #e6e6e6;
     }
     
-    /* Buttons - Green Gradients */
+    /* Buttons - Primary Action */
     .stButton>button {
-        background: linear-gradient(45deg, #28a745, #85e085); /* Green */
+        background-color: #238636; /* Dev Green */
         color: white;
-        border: none;
-        border-radius: 8px;
+        border: 1px solid rgba(240, 246, 252, 0.1);
+        border-radius: 6px;
         padding: 0.5rem 1rem;
-        font-weight: bold;
-        transition: transform 0.2s, box-shadow 0.2s;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        font-weight: 600;
+        transition: all 0.2s ease-in-out;
     }
     .stButton>button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 8px rgba(0,0,0,0.15);
-        color: white;
+        background-color: #2ea043;
+        border-color: rgba(240, 246, 252, 0.1);
+        transform: scale(1.02);
     }
     
     /* Chat Bubbles */
     .stChatMessage {
-        background-color: #f8f9fa; /* Light Grey/White */
-        border: 1px solid #e9ecef;
-        border-radius: 15px;
-        padding: 10px;
-        margin-bottom: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        background-color: #161b22; /* Sidebar Color */
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        padding: 15px;
+        margin-bottom: 12px;
     }
     
-    /* User Message Accent - Blue */
-    .stChatMessage[data-testid="stChatMessage"]:nth-child(odd) {
-        border-left: 5px solid #0044cc;
-    }
-     /* Assistant Message Accent - Red/Orange */
-    .stChatMessage[data-testid="stChatMessage"]:nth-child(even) {
-        border-left: 5px solid #dc3545;
+    /* Assistant Message specifically */
+    .stChatMessage[data-testid="stChatMessage"][data-author="assistant"] {
+        border-left: 4px solid #58a6ff; /* Blue Accent */
     }
     
-    /* Sidebar - Light Blue Tint */
+    /* User Message specifically */
+    .stChatMessage[data-testid="stChatMessage"][data-author="user"] {
+        border-left: 4px solid #238636; /* Green Accent */
+    }
+    
+    /* Sidebar */
     [data-testid="stSidebar"] {
-        background-color: #f0f7ff;
-        border-right: 1px solid #cce5ff;
+        background-color: #010409;
+        border-right: 1px solid #30363d;
     }
     
     /* Inputs */
     .stTextInput>div>div>input {
-        background-color: #ffffff;
-        color: #333333;
-        border: 2px solid #0044cc; /* Blue Border */
-        border-radius: 8px;
+        background-color: #0d1117;
+        color: #e6e6e6;
+        border: 1px solid #30363d;
+        border-radius: 6px;
+    }
+    .stTextInput>div>div>input:focus {
+        border-color: #58a6ff;
+    }
+    
+    /* Audio Input */
+    [data-testid="stAudioInput"] {
+        background-color: #161b22;
+        border-radius: 12px;
+        border: 1px solid #30363d;
     }
     
     /* Expander */
     .streamlit-expanderHeader {
-        color: #0044cc;
-        font-weight: bold;
+        background-color: #161b22;
+        color: #58a6ff;
+        border-radius: 6px;
     }
 </style>
 """, unsafe_allow_html=True)
