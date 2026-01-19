@@ -110,24 +110,31 @@ with tab1:
                 st.markdown(message["content"])
 
         # Voice Input Option
-        from streamlit_mic_recorder import speech_to_text
+        # Voice Input Option (Native)
+        input_audio = st.audio_input("🎙️ Speak to DevMate")
         
-        st.write("🎙️ Voice Input:")
-        text = speech_to_text(
-            language='en',
-            start_prompt="Start Recording",
-            stop_prompt="Stop Recording",
-            just_once=False,
-            key='voice_input'
-        )
-        
-        # Determine input source: Voice or Text
         user_input = None
-        if text:
-            user_input = text
         
-        # React to user input (text bar overrides voice if both present, or we can just check what triggered)
+        if input_audio:
+            # Transcribe audio using speech_recognition
+            import speech_recognition as sr
+            r = sr.Recognizer()
+            try:
+                with sr.AudioFile(input_audio) as source:
+                    audio_data = r.record(source)
+                    text = r.recognize_google(audio_data)
+                    user_input = text
+            except Exception as e:
+                st.warning(f"Could not understand audio: {e}")
+        
+        # React to user input (text bar overrides voice if both present)
+        # We need to handle the case where audio input is present but user also types
+        # But st.audio_input persists. 
+        # Logic: If audio changed, use audio. If text submitted, use text.
+        # Simple logic: If text input is submitted, use it. Else if audio is there, use it.
+        
         if prompt := st.chat_input("What would you like to know?"):
+             user_input = prompt
              user_input = prompt
              
         if user_input:
