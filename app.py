@@ -15,10 +15,7 @@ with st.sidebar:
 # Main content area
 col1, col2 = st.columns([2, 1])
 
-with col1:
-    st.subheader("Ask DevMate")
-    question = st.text_area("What would you like to know?", placeholder="How do I run this project?", height=150)
-
+# Admin Section
 with col2:
     st.subheader("Your Profile")
     st.write(f"**Role:** {role}")
@@ -34,22 +31,60 @@ with col2:
                 st.success("Ingestion complete!")
             except Exception as e:
                 st.error(f"Ingestion failed: {e}")
+    
+    if st.button("🗑️ Clear Chat History"):
+        st.session_state.messages = []
+        st.rerun()
 
-if st.button("🚀 Ask DevMate", use_container_width=True):
-    if question.strip():
-        with st.spinner("Thinking..."):
-            try:
-                # Try to load RAG module
-                from rag import ask_devmate
-                response = ask_devmate(question, role, exp)
-                if response:
-                    st.success("Response received!")
-                    st.write(response)
-                else:
-                    st.error("Empty response received. Check logs/credentials.")
-            except Exception as e:
-                st.warning(f"RAG module not available or failed: {str(e)}")
-                st.info("Ensure AWS credentials are set in .env and dependencies are installed.")
-                # Fallback removed to avoid confusion
-    else:
-        st.warning("Please enter a question first!")
+# Initialize chat history
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# Display chat messages from history on app rerun
+with col1:
+    st.subheader("Ask DevMate")
+    
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+    # React to user input
+    if prompt := st.chat_input("What would you like to know?"):
+        # Display user message in chat message container
+        st.chat_message("user").markdown(prompt)
+        # Add user message to chat history
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        
+        # Prepare history string for RAG
+        history_str = ""
+        for msg in st.session_state.messages[:-1]: # Exclude current prompt to avoid duplication if handled by RAG internally (though here we manage it manually)
+            role_name = "Human" if msg["role"] == "user" else "Assistant"
+            history_str += f"{role_name}: {msg['content']}\n"
+
+        with st.chat_message("assistant"):
+            with st.spinner("Thinking..."):
+                try:
+                    from rag import ask_devmate
+                    # Call RAG with history
+                    result = ask_devmate(prompt, role, exp, history_str)
+                    
+                    if isinstance(result, dict):
+                        response_text = result.get("answer", "")
+                        sources = result.get("sources", [])
+                    else:
+                        response_text = str(result)
+                        sources = []
+                    
+                    st.markdown(response_text)
+                    
+                    # specific display for sources
+                    if sources:
+                        with st.expander("📚 Source Documents"):
+                            for source in sources:
+                                st.caption(f"📄 {source}")
+                                
+                    # Add assistant response to chat history
+                    st.session_state.messages.append({"role": "assistant", "content": response_text})
+                    
+                except Exception as e:
+                    st.error(f"Error: {str(e)}")

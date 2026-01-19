@@ -8,9 +8,14 @@ FAISS_INDEX_DIR = "faiss_index"
 
 FAISS_INDEX_DIR = "faiss_index"
 
-def ask_devmate(question, role, exp):
+def ask_devmate(question, role, exp, history=""):
     """
     Main function to query the RAG system.
+    Args:
+        question: User's question
+        role: User's role
+        exp: User's experience
+        history: Formatted chat history string
     """
     try:
         # Initialize components
@@ -18,24 +23,29 @@ def ask_devmate(question, role, exp):
         llm = get_llm()
         
         if not embeddings or not llm:
-            return "Error: Failed to initialize AWS Bedrock components. Check your credentials."
+            return {"answer": "Error: Failed to initialize AWS Bedrock components. Check your credentials.", "sources": []}
             
         if not os.path.exists(FAISS_INDEX_DIR):
-            return f"Error: FAISS index not found at {FAISS_INDEX_DIR}. Please run 'Re-ingest Knowledge Base' first."
+            return {"answer": f"Error: FAISS index not found at {FAISS_INDEX_DIR}. Please run 'Re-ingest Knowledge Base' first.", "sources": []}
             
         # Load Vector Store
         vectorstore = FAISS.load_local(FAISS_INDEX_DIR, embeddings, allow_dangerous_deserialization=True)
         retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
         
-        # Create Prompt with Role/Experience context
+        # Create Prompt with Role/Experience + History context
         final_prompt_template = f"""
         Human: You are DevMate, a helpful developer onboarding assistant.
+        
+        User Profile:
+        - Role: {role}
+        - Experience: {exp}
+        
+        Previous Conversation:
+        {history}
+        
         Use the following pieces of context to answer the question at the end.
         
         Context: {{context}}
-        
-        User Role: {role}
-        User Experience: {exp}
         
         Question: {{question}}
         
@@ -52,12 +62,28 @@ def ask_devmate(question, role, exp):
             chain_type="stuff",
             retriever=retriever,
             chain_type_kwargs={"prompt": PROMPT},
-            return_source_documents=False
+            return_source_documents=True
         )
         
         # Run Chain
         result = chain.invoke({"query": question})
-        return result['result']
+        
+        # Extract Answer and Sources
+        answer = result['result']
+        source_docs = result.get('source_documents', [])
+        
+        # Format sources
+        sources = []
+        for doc in source_docs:
+            source_name = doc.metadata.get('source', 'Unknown')
+            # Only keep the filename, not the full path
+            source_name = os.path.basename(source_name)
+            sources.append(source_name)
+            
+        # Remove duplicates
+        sources = list(set(sources))
+        
+        return {"answer": answer, "sources": sources}
         
     except Exception as e:
-        return f"Error: {str(e)}"
+        return {"answer": f"Error: {str(e)}", "sources": []}
