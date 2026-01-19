@@ -6,55 +6,72 @@ st.set_page_config(page_title="DevMate", layout="wide")
 # Custom CSS for UI Polish
 st.markdown("""
 <style>
-    /* Global Styles */
+    /* Global Styles - White Background */
     .stApp {
-        background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
-        color: white;
+        background-color: #ffffff;
+        color: #333333;
     }
     
-    /* Typography */
+    /* Typography - Blue Headers */
     h1, h2, h3 {
         font-family: 'Inter', sans-serif;
-        color: #00ffcc !important;
+        color: #0044cc !important; /* Strong Blue */
     }
     
-    /* Buttons */
+    /* Buttons - Green Gradients */
     .stButton>button {
-        background: linear-gradient(45deg, #00c6ff, #0072ff);
+        background: linear-gradient(45deg, #28a745, #85e085); /* Green */
         color: white;
         border: none;
         border-radius: 8px;
         padding: 0.5rem 1rem;
         font-weight: bold;
-        transition: transform 0.2s;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     .stButton>button:hover {
-        transform: scale(1.05);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0,0,0,0.15);
         color: white;
     }
     
     /* Chat Bubbles */
     .stChatMessage {
-        background-color: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background-color: #f8f9fa; /* Light Grey/White */
+        border: 1px solid #e9ecef;
         border-radius: 15px;
         padding: 10px;
         margin-bottom: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     
-    /* Sidebar */
+    /* User Message Accent - Blue */
+    .stChatMessage[data-testid="stChatMessage"]:nth-child(odd) {
+        border-left: 5px solid #0044cc;
+    }
+     /* Assistant Message Accent - Red/Orange */
+    .stChatMessage[data-testid="stChatMessage"]:nth-child(even) {
+        border-left: 5px solid #dc3545;
+    }
+    
+    /* Sidebar - Light Blue Tint */
     [data-testid="stSidebar"] {
-        background-color: rgba(0, 0, 0, 0.2);
-        backdrop-filter: blur(10px);
-        border-right: 1px solid rgba(255, 255, 255, 0.1);
+        background-color: #f0f7ff;
+        border-right: 1px solid #cce5ff;
     }
     
     /* Inputs */
     .stTextInput>div>div>input {
-        background-color: rgba(255, 255, 255, 0.1);
-        color: white;
+        background-color: #ffffff;
+        color: #333333;
+        border: 2px solid #0044cc; /* Blue Border */
         border-radius: 8px;
-        border: 1px solid #00c6ff;
+    }
+    
+    /* Expander */
+    .streamlit-expanderHeader {
+        color: #0044cc;
+        font-weight: bold;
     }
 </style>
 """, unsafe_allow_html=True)
