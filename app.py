@@ -115,6 +115,18 @@ with tab1:
         st.divider()
         st.subheader("Knowledge Base")
         
+        # Show current files
+        docs_path = "data/docs"
+        if os.path.exists(docs_path):
+            files = os.listdir(docs_path)
+            num_files = len(files)
+            st.info(f"📚 {num_files} Documents Indexed")
+            with st.expander("View Files"):
+                for f in files:
+                    st.caption(f"📄 {f}")
+        else:
+             st.info("0 Documents Indexed")
+        
         # File Uploader
         uploaded_files = st.file_uploader("Upload Docs (PDF, TXT, MD)", 
                                         type=["pdf", "txt", "md"], 
