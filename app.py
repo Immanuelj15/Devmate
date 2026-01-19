@@ -3,6 +3,62 @@ import os
 
 st.set_page_config(page_title="DevMate", layout="wide")
 
+# Custom CSS for UI Polish
+st.markdown("""
+<style>
+    /* Global Styles */
+    .stApp {
+        background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+        color: white;
+    }
+    
+    /* Typography */
+    h1, h2, h3 {
+        font-family: 'Inter', sans-serif;
+        color: #00ffcc !important;
+    }
+    
+    /* Buttons */
+    .stButton>button {
+        background: linear-gradient(45deg, #00c6ff, #0072ff);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-weight: bold;
+        transition: transform 0.2s;
+    }
+    .stButton>button:hover {
+        transform: scale(1.05);
+        color: white;
+    }
+    
+    /* Chat Bubbles */
+    .stChatMessage {
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+    
+    /* Sidebar */
+    [data-testid="stSidebar"] {
+        background-color: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Inputs */
+    .stTextInput>div>div>input {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-radius: 8px;
+        border: 1px solid #00c6ff;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 st.title("🤖 DevMate – Developer Onboarding Assistant")
 st.write("Welcome to DevMate - Your Developer Onboarding Assistant")
 
@@ -53,12 +109,32 @@ with tab1:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
 
-        # React to user input
+        # Voice Input Option
+        from streamlit_mic_recorder import speech_to_text
+        
+        st.write("🎙️ Voice Input:")
+        text = speech_to_text(
+            language='en',
+            start_prompt="Start Recording",
+            stop_prompt="Stop Recording",
+            just_once=False,
+            key='voice_input'
+        )
+        
+        # Determine input source: Voice or Text
+        user_input = None
+        if text:
+            user_input = text
+        
+        # React to user input (text bar overrides voice if both present, or we can just check what triggered)
         if prompt := st.chat_input("What would you like to know?"):
+             user_input = prompt
+             
+        if user_input:
             # Display user message in chat message container
-            st.chat_message("user").markdown(prompt)
+            st.chat_message("user").markdown(user_input)
             # Add user message to chat history
-            st.session_state.messages.append({"role": "user", "content": prompt})
+            st.session_state.messages.append({"role": "user", "content": user_input})
             
             # Prepare history string for RAG
             history_str = ""
@@ -71,7 +147,7 @@ with tab1:
                     try:
                         from rag import ask_devmate
                         # Call RAG with history
-                        result = ask_devmate(prompt, role, exp, history_str)
+                        result = ask_devmate(user_input, role, exp, history_str)
                         
                         if isinstance(result, dict):
                             response_text = result.get("answer", "")
@@ -91,6 +167,23 @@ with tab1:
                         # Add assistant response to chat history
                         st.session_state.messages.append({"role": "assistant", "content": response_text})
                         
+                        # Generate and play audio
+                        try:
+                            from gtts import gTTS
+                            from io import BytesIO
+                            
+                            # Create a BytesIO buffer
+                            audio_bytes = BytesIO()
+                            
+                            # Generate speech
+                            tts = gTTS(text=response_text, lang='en')
+                            tts.write_to_fp(audio_bytes)
+                            
+                            # Play audio
+                            st.audio(audio_bytes, format='audio/mp3')
+                        except Exception as e:
+                            st.warning(f"Audio generation failed: {e}")
+                            
                     except Exception as e:
                         st.error(f"Error: {str(e)}")
 
