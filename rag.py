@@ -87,3 +87,79 @@ def ask_devmate(question, role, exp, history=""):
         
     except Exception as e:
         return {"answer": f"Error: {str(e)}", "sources": []}
+
+def generate_quiz():
+    """
+    Generates a 3-question quiz based on the knowledge base.
+    """
+    try:
+        # Initialize components
+        embeddings = get_embeddings()
+        llm = get_llm()
+        
+        if not embeddings or not llm:
+            return None
+            
+        vectorstore = FAISS.load_local(FAISS_INDEX_DIR, embeddings, allow_dangerous_deserialization=True)
+        retriever = vectorstore.as_retriever(search_kwargs={"k": 5}) # Get broad context
+        
+        # We need to retrieve some random/broad context to base the quiz on.
+        # Since we can't search for "everything", we'll search for key project terms.
+        # A simple hack: search for "overview features setup"
+        docs = retriever.invoke("project overview features setup")
+        context_text = "\n".join([doc.page_content for doc in docs])
+        
+        prompt_template = f"""
+        Human: based on the following context, generate a quiz with 3 multiple-choice questions.
+        Return the result correctly formatted in JSON with the keys: "question", "options" (list of 4 strings), and "answer" (the correct string).
+        Do not output any markdown code blocks or text, just the raw JSON list.
+        
+        Context:
+        {context_text}
+        
+        Assistant:"""
+        
+        # Direct generation
+        response = llm.invoke(prompt_template)
+        
+        # Parse JSON
+        import json
+        import re
+        
+        content = response.content.strip()
+        # Clean potential markdown
+        content = re.sub(r'```json', '', content)
+        content = re.sub(r'```', '', content)
+        
+        quiz_data = json.loads(content)
+        return quiz_data
+        
+    except Exception as e:
+        print(f"Quiz Generation Error: {e}")
+        return []
+
+def explain_code(code_snippet):
+    """
+    Explains a code snippet line-by-line using the LLM.
+    """
+    try:
+        llm = get_llm()
+        if not llm:
+            return "Error: LLM not initialized."
+            
+        prompt = f"""
+        Human: You are an expert senior developer. Please explain the following code snippet to a junior developer.
+        Break it down line-by-line or by logical blocks. Explain WHY it is done this way, not just WHAT it does.
+        
+        Code Snippet:
+        ```
+        {code_snippet}
+        ```
+        
+        Assistant:"""
+        
+        response = llm.invoke(prompt)
+        return response.content
+        
+    except Exception as e:
+        return f"Error explaining code: {str(e)}"
