@@ -198,9 +198,29 @@ with st.sidebar:
                 except Exception as e:
                     st.error(f"{e}")
     with col_b:
-        if st.button("🗑️ Clear", use_container_width=True):
+        if st.button("🗑️ Clear Chat", use_container_width=True):
             st.session_state.messages = []
             st.rerun()
+            
+    if st.button("💣 Hard Reset Brain", use_container_width=True, type="primary"):
+        import shutil
+        with st.spinner("Wiping memory..."):
+             if os.path.exists("data"):
+                 def on_rm_error(func, path, exc_info):
+                    import stat
+                    os.chmod(path, stat.S_IWRITE)
+                    func(path)
+                 shutil.rmtree("data", onerror=on_rm_error)
+             if os.path.exists("faiss_index"):
+                 shutil.rmtree("faiss_index")
+             
+             # Recreate empty structure
+             os.makedirs("data/docs", exist_ok=True)
+             os.makedirs("data/repos", exist_ok=True)
+             
+             st.session_state.messages = []
+             st.success("Memory Wiped! Ready for new project.")
+             st.rerun()
 
 # Main content area
 # Main content area
