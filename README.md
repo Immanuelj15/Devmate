@@ -21,6 +21,7 @@ DevMate is an intelligent RAG (Retrieval-Augmented Generation) application desig
 *   **🎮 Gamified Quiz Mode**: A generated multiple-choice quiz to test your understanding of the knowledge base.
 *   **💻 Code Explainer**: Paste complex code snippets and get line-by-line explanations suitable for juniors.
 *   **🎙️ Voice Support**: Speak to DevMate using your microphone.
+*   **📂 Multi-Language Support**: Understands code in Python, JavaScript, TypeScript, Java, C++, Go, Rust, PHP, and more.
 
 ## 🛠️ Technology Stack
 
@@ -62,7 +63,7 @@ DevMate is an intelligent RAG (Retrieval-Augmented Generation) application desig
 ### Usage
 
 1.  **Ingest Knowledge Base**:
-    Place your text/PDF/Markdown files in the `data/docs/` folder.
+    Place your text/PDF/Markdown or **Code files** (py, js, ts, etc.) in the `data/docs/` folder.
     ```bash
     python ingest_docs.py
     ```
