@@ -127,66 +127,69 @@ with tab1:
         else:
              st.info("0 Documents Indexed")
         
-        # 2. Upload
+        # 2. Add Data (Tabs for cleaner UI)
         st.markdown("---")
-        st.markdown("**1. Upload Files**")
-        uploaded_files = st.file_uploader("Drop PDF/TXT/MD here", 
-                                        type=["pdf", "txt", "md"], 
-                                        accept_multiple_files=True,
-                                        label_visibility="collapsed")
+        st.write("📥 **Add to Knowledge Base**")
         
-        if uploaded_files:
-            if st.button("✅ Process Uploads", use_container_width=True):
-                save_path = "data/docs"
-                if not os.path.exists(save_path):
-                    os.makedirs(save_path)
-                    
-                with st.spinner("Saving..."):
-                    count = 0
-                    for uploaded_file in uploaded_files:
-                        try:
-                            file_path = os.path.join(save_path, uploaded_file.name)
-                            with open(file_path, "wb") as f:
-                                f.write(uploaded_file.getbuffer())
-                            count += 1
-                        except Exception as e:
-                            st.error(f"Error: {e}")
-                    
-                    if count > 0:
-                        try:
+        ingest_tabs = st.tabs(["📄 Upload Files", "🐙 GitHub Repo"])
+        
+        with ingest_tabs[0]:
+            uploaded_files = st.file_uploader("Drop PDF/TXT/MD here", 
+                                            type=["pdf", "txt", "md"], 
+                                            accept_multiple_files=True,
+                                            label_visibility="collapsed")
+            
+            if uploaded_files:
+                if st.button("✅ Process Files", use_container_width=True):
+                    save_path = "data/docs"
+                    if not os.path.exists(save_path):
+                        os.makedirs(save_path)
+                        
+                    with st.spinner("Saving..."):
+                        count = 0
+                        for uploaded_file in uploaded_files:
+                            try:
+                                file_path = os.path.join(save_path, uploaded_file.name)
+                                with open(file_path, "wb") as f:
+                                    f.write(uploaded_file.getbuffer())
+                                count += 1
+                            except Exception as e:
+                                st.error(f"Error: {e}")
+                        
+                        if count > 0:
+                            try:
+                                from ingest_docs import ingest_docs
+                                ingest_docs()
+                                st.success(f"Added {count} files!")
+                            except Exception as e:
+                                st.error(f"Ingest failed: {e}")
+
+        with ingest_tabs[1]:
+            repo_url = st.text_input("Repo URL", placeholder="https://github.com/...", label_visibility="collapsed")
+            
+            if st.button("⬇️ Clone Repo", use_container_width=True):
+                if repo_url:
+                    try:
+                        import git
+                        import shutil
+                        
+                        repo_name = repo_url.split("/")[-1].replace(".git", "")
+                        clone_path = os.path.join("data", "repos", repo_name)
+                        
+                        if os.path.exists(clone_path):
+                            shutil.rmtree(clone_path)
+                        
+                        with st.spinner(f"Cloning {repo_name}..."):
+                            git.Repo.clone_from(repo_url, clone_path)
+                            st.success(f"Cloned {repo_name}!")
+                        
+                        with st.spinner("Learning code..."):
                             from ingest_docs import ingest_docs
                             ingest_docs()
-                            st.success(f"Added {count} files!")
-                        except Exception as e:
-                            st.error(f"Ingest failed: {e}")
-
-        # 3. GitHub
-        st.markdown("**2. Clone GitHub Repo**")
-        repo_url = st.text_input("Repo URL", placeholder="https://github.com/...", label_visibility="collapsed")
-        
-        if st.button("🐙 Clone & Learn", use_container_width=True):
-            if repo_url:
-                try:
-                    import git
-                    import shutil
-                    
-                    repo_name = repo_url.split("/")[-1].replace(".git", "")
-                    clone_path = os.path.join("data", "repos", repo_name)
-                    
-                    if os.path.exists(clone_path):
-                        shutil.rmtree(clone_path)
-                    
-                    with st.spinner(f"Cloning {repo_name}..."):
-                        git.Repo.clone_from(repo_url, clone_path)
-                        st.success(f"Cloned {repo_name}!")
-                    
-                    with st.spinner("Learning code..."):
-                        from ingest_docs import ingest_docs
-                        ingest_docs()
-                        st.success("Brain Updated!")
-                        
-                except Exception as e:
-                    st.error(f"Error: {e}")
+                            st.success("Brain Updated!")
+                            
+                    except Exception as e:
+                        st.error(f"Error: {e}")
 
         # 4. Actions
         st.divider()
