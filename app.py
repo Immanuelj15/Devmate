@@ -103,15 +103,32 @@ with st.sidebar:
     
     # 1. Stats
     docs_path = "data/docs"
+    repos_path = "data/repos"
+    
+    total_docs = 0
+    doc_files = []
+    
+    # Count uploaded docs
     if os.path.exists(docs_path):
-        files = os.listdir(docs_path)
-        num_files = len(files)
-        st.info(f"📚 **{num_files}** Documents Indexed")
+        doc_files = os.listdir(docs_path)
+        total_docs += len(doc_files)
+        
+    # Count repo files (recursive)
+    if os.path.exists(repos_path):
+        for root, dirs, files in os.walk(repos_path):
+             # Filter for supported code/text files only to be accurate
+             valid_files = [f for f in files if f.endswith(('.py', '.js', '.jsx', '.ts', '.tsx', '.html', '.css', '.md', '.txt', '.pdf', '.json', '.java', '.cpp'))]
+             total_docs += len(valid_files)
+             
+    if total_docs > 0:
+        st.info(f"📚 **{total_docs}** Documents Indexed")
         with st.expander("View Index"):
-            for f in files:
+            for f in doc_files:
                 st.caption(f"📄 {f}")
+            if os.path.exists(repos_path):
+                 st.caption("... plus git repo files")
     else:
-            st.info("0 Documents Indexed")
+        st.info("0 Documents Indexed")
     
     # 2. Add Data (Tabs for cleaner UI)
     st.markdown("---")
