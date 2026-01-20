@@ -161,8 +161,11 @@ with st.sidebar:
                     
                     if count > 0:
                         try:
-                            from ingest_docs import ingest_docs
-                            ingest_docs()
+                            import ingest_docs as ingest_docs_module
+                            import importlib
+                            importlib.reload(ingest_docs_module)
+                            
+                            ingest_docs_module.ingest_docs()
                             st.success(f"Added {count} files!")
                         except Exception as e:
                             st.error(f"Ingest failed: {e}")
@@ -193,8 +196,11 @@ with st.sidebar:
                         st.success(f"Cloned {repo_name}!")
                     
                     with st.spinner("Learning code..."):
-                        from ingest_docs import ingest_docs
-                        ingest_docs()
+                        import ingest_docs as ingest_docs_module
+                        import importlib
+                        importlib.reload(ingest_docs_module)
+                        
+                        ingest_docs_module.ingest_docs()
                         st.success("Brain Updated!")
                         
                 except Exception as e:
@@ -207,10 +213,13 @@ with st.sidebar:
     col_a, col_b = st.columns(2)
     with col_a:
         if st.button("🔄 Refresh", use_container_width=True):
-             with st.spinner("Refreshing..."):
+            with st.spinner("Refreshing..."):
                 try:
-                    from ingest_docs import ingest_docs
-                    ingest_docs()
+                    import ingest_docs as ingest_docs_module
+                    import importlib
+                    importlib.reload(ingest_docs_module)
+                    
+                    ingest_docs_module.ingest_docs()
                     st.success("Done!")
                 except Exception as e:
                     st.error(f"{e}")
