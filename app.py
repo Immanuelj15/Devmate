@@ -113,32 +113,35 @@ with tab1:
         st.write(f"**Experience:** {exp}")
         
         st.divider()
-        st.subheader("Knowledge Base")
+        st.subheader("🧠 Knowledge Base")
         
-        # Show current files
+        # 1. Stats
         docs_path = "data/docs"
         if os.path.exists(docs_path):
             files = os.listdir(docs_path)
             num_files = len(files)
-            st.info(f"📚 {num_files} Documents Indexed")
-            with st.expander("View Files"):
+            st.info(f"📚 **{num_files}** Documents Indexed")
+            with st.expander("View Index"):
                 for f in files:
                     st.caption(f"📄 {f}")
         else:
              st.info("0 Documents Indexed")
         
-        # File Uploader
-        uploaded_files = st.file_uploader("Upload Docs (PDF, TXT, MD)", 
+        # 2. Upload
+        st.markdown("---")
+        st.markdown("**1. Upload Files**")
+        uploaded_files = st.file_uploader("Drop PDF/TXT/MD here", 
                                         type=["pdf", "txt", "md"], 
-                                        accept_multiple_files=True)
+                                        accept_multiple_files=True,
+                                        label_visibility="collapsed")
         
         if uploaded_files:
-            if st.button("Submit & Process"):
+            if st.button("✅ Process Uploads", use_container_width=True):
                 save_path = "data/docs"
                 if not os.path.exists(save_path):
                     os.makedirs(save_path)
                     
-                with st.spinner("Saving and indexing..."):
+                with st.spinner("Saving..."):
                     count = 0
                     for uploaded_file in uploaded_files:
                         try:
@@ -147,31 +150,21 @@ with tab1:
                                 f.write(uploaded_file.getbuffer())
                             count += 1
                         except Exception as e:
-                            st.error(f"Error saving {uploaded_file.name}: {e}")
+                            st.error(f"Error: {e}")
                     
                     if count > 0:
                         try:
                             from ingest_docs import ingest_docs
                             ingest_docs()
-                            st.success(f"Successfully added {count} documents!")
+                            st.success(f"Added {count} files!")
                         except Exception as e:
-                            st.error(f"Ingestion failed: {e}")
-                            
-        if st.button("🔄 Re-ingest All Custom Data"):
-             with st.spinner("Ingesting documents..."):
-                try:
-                    from ingest_docs import ingest_docs
-                    ingest_docs()
-                    st.success("Ingestion complete!")
-                except Exception as e:
-                    st.error(f"Ingestion failed: {e}")
+                            st.error(f"Ingest failed: {e}")
+
+        # 3. GitHub
+        st.markdown("**2. Clone GitHub Repo**")
+        repo_url = st.text_input("Repo URL", placeholder="https://github.com/...", label_visibility="collapsed")
         
-        # GitHub Repo Ingestion
-        st.divider()
-        st.subheader("GitHub Integration")
-        repo_url = st.text_input("Clone a Public Repo:", placeholder="https://github.com/user/repo")
-        
-        if st.button("🐙 Clone & Learn"):
+        if st.button("🐙 Clone & Learn", use_container_width=True):
             if repo_url:
                 try:
                     import git
@@ -180,7 +173,6 @@ with tab1:
                     repo_name = repo_url.split("/")[-1].replace(".git", "")
                     clone_path = os.path.join("data", "repos", repo_name)
                     
-                    # Cleanup old if exists
                     if os.path.exists(clone_path):
                         shutil.rmtree(clone_path)
                     
@@ -188,17 +180,32 @@ with tab1:
                         git.Repo.clone_from(repo_url, clone_path)
                         st.success(f"Cloned {repo_name}!")
                     
-                    with st.spinner("Ingesting code..."):
+                    with st.spinner("Learning code..."):
                         from ingest_docs import ingest_docs
                         ingest_docs()
-                        st.success("Knowledge Base Updated!")
+                        st.success("Brain Updated!")
                         
                 except Exception as e:
-                    st.error(f"Error cloning repo: {e}")
+                    st.error(f"Error: {e}")
+
+        # 4. Actions
+        st.divider()
+        st.subheader("⚙️ Actions")
         
-        if st.button("🗑️ Clear Chat History"):
-            st.session_state.messages = []
-            st.rerun()
+        col_a, col_b = st.columns(2)
+        with col_a:
+            if st.button("🔄 Refresh", use_container_width=True):
+                 with st.spinner("Refreshing..."):
+                    try:
+                        from ingest_docs import ingest_docs
+                        ingest_docs()
+                        st.success("Done!")
+                    except Exception as e:
+                        st.error(f"{e}")
+        with col_b:
+            if st.button("🗑️ Clear", use_container_width=True):
+                st.session_state.messages = []
+                st.rerun()
 
     # Initialize chat history
     if "messages" not in st.session_state:
