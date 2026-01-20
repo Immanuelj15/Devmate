@@ -208,12 +208,16 @@ with tab1:
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # Display chat messages from history on app rerun
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+    # Container for all chat messages (History + New)
+    chat_container = st.container()
 
-    # Voice Input Option
+    # Display chat messages from history on app rerun
+    with chat_container:
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
+
+    # Voice Input Option (Placed AFTER the chat container so it's below messages)
     input_audio = st.audio_input("🎙️ Speak to DevMate")
     
     user_input = None
@@ -234,61 +238,63 @@ with tab1:
             user_input = prompt
             
     if user_input:
-        # Display user message in chat message container
-        st.chat_message("user").markdown(user_input)
-        # Add user message to chat history
-        st.session_state.messages.append({"role": "user", "content": user_input})
-        
-        # Prepare history string for RAG
-        history_str = ""
-        for msg in st.session_state.messages[:-1]: 
-            role_name = "Human" if msg["role"] == "user" else "Assistant"
-            history_str += f"{role_name}: {msg['content']}\n"
+        # Append new messages to the SAME container
+        with chat_container:
+            # Display user message in chat message container
+            st.chat_message("user").markdown(user_input)
+            # Add user message to chat history
+            st.session_state.messages.append({"role": "user", "content": user_input})
+            
+            # Prepare history string for RAG
+            history_str = ""
+            for msg in st.session_state.messages[:-1]: 
+                role_name = "Human" if msg["role"] == "user" else "Assistant"
+                history_str += f"{role_name}: {msg['content']}\n"
 
-        with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
-                try:
-                    from rag import ask_devmate
-                    # Call RAG with history
-                    result = ask_devmate(user_input, role, exp, history_str)
-                    
-                    if isinstance(result, dict):
-                        response_text = result.get("answer", "")
-                        sources = result.get("sources", [])
-                    else:
-                        response_text = str(result)
-                        sources = []
-                    
-                    st.markdown(response_text)
-                    
-                    # specific display for sources
-                    if sources:
-                        with st.expander("📚 Source Documents"):
-                            for source in sources:
-                                st.caption(f"📄 {source}")
-                                
-                    # Add assistant response to chat history
-                    st.session_state.messages.append({"role": "assistant", "content": response_text})
-                    
-                    # Generate and play audio
+            with st.chat_message("assistant"):
+                with st.spinner("Thinking..."):
                     try:
-                        from gtts import gTTS
-                        from io import BytesIO
+                        from rag import ask_devmate
+                        # Call RAG with history
+                        result = ask_devmate(user_input, role, exp, history_str)
                         
-                        # Create a BytesIO buffer
-                        audio_bytes = BytesIO()
+                        if isinstance(result, dict):
+                            response_text = result.get("answer", "")
+                            sources = result.get("sources", [])
+                        else:
+                            response_text = str(result)
+                            sources = []
                         
-                        # Generate speech
-                        tts = gTTS(text=response_text, lang='en')
-                        tts.write_to_fp(audio_bytes)
+                        st.markdown(response_text)
                         
-                        # Play audio
-                        st.audio(audio_bytes, format='audio/mp3')
+                        # specific display for sources
+                        if sources:
+                            with st.expander("📚 Source Documents"):
+                                for source in sources:
+                                    st.caption(f"📄 {source}")
+                                    
+                        # Add assistant response to chat history
+                        st.session_state.messages.append({"role": "assistant", "content": response_text})
+                        
+                        # Generate and play audio
+                        try:
+                            from gtts import gTTS
+                            from io import BytesIO
+                            
+                            # Create a BytesIO buffer
+                            audio_bytes = BytesIO()
+                            
+                            # Generate speech
+                            tts = gTTS(text=response_text, lang='en')
+                            tts.write_to_fp(audio_bytes)
+                            
+                            # Play audio
+                            st.audio(audio_bytes, format='audio/mp3')
+                        except Exception as e:
+                            st.warning(f"Audio generation failed: {e}")
+                            
                     except Exception as e:
-                        st.warning(f"Audio generation failed: {e}")
-                        
-                except Exception as e:
-                    st.error(f"Error: {str(e)}")
+                        st.error(f"Error: {str(e)}")
 
 with tab2:
     st.header("🎮 Knowledge Check")
