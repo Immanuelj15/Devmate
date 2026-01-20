@@ -222,6 +222,9 @@ with tab1:
         for message in st.session_state.messages:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
+        
+        # Add a spacer at the bottom so the last message isn't hidden by the floating footer
+        st.write("<div style='height: 80px;'></div>", unsafe_allow_html=True)
 
     # Custom CSS for Bottom Bar
     from streamlit_float import float_init
