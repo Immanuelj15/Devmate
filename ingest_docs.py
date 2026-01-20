@@ -30,6 +30,9 @@ def ingest_docs():
                 elif file.endswith(".md"):
                     loader = TextLoader(file_path, encoding='utf-8')
                     documents.extend(loader.load())
+                elif file.endswith(".py"):
+                    loader = TextLoader(file_path, encoding='utf-8')
+                    documents.extend(loader.load())
             except Exception as e:
                 print(f"Error loading {file}: {e}")
 

@@ -166,6 +166,36 @@ with tab1:
                 except Exception as e:
                     st.error(f"Ingestion failed: {e}")
         
+        # GitHub Repo Ingestion
+        st.divider()
+        st.subheader("GitHub Integration")
+        repo_url = st.text_input("Clone a Public Repo:", placeholder="https://github.com/user/repo")
+        
+        if st.button("🐙 Clone & Learn"):
+            if repo_url:
+                try:
+                    import git
+                    import shutil
+                    
+                    repo_name = repo_url.split("/")[-1].replace(".git", "")
+                    clone_path = os.path.join("data", "repos", repo_name)
+                    
+                    # Cleanup old if exists
+                    if os.path.exists(clone_path):
+                        shutil.rmtree(clone_path)
+                    
+                    with st.spinner(f"Cloning {repo_name}..."):
+                        git.Repo.clone_from(repo_url, clone_path)
+                        st.success(f"Cloned {repo_name}!")
+                    
+                    with st.spinner("Ingesting code..."):
+                        from ingest_docs import ingest_docs
+                        ingest_docs()
+                        st.success("Knowledge Base Updated!")
+                        
+                except Exception as e:
+                    st.error(f"Error cloning repo: {e}")
+        
         if st.button("🗑️ Clear Chat History"):
             st.session_state.messages = []
             st.rerun()
