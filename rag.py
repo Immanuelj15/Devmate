@@ -33,7 +33,9 @@ def ask_devmate(question, role, exp, history=""):
         retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
         
         # Create Prompt with Role/Experience + History context
-        final_prompt_template = f"""
+        # We use a PromptTemplate where we pass everything as variables to the chain
+        
+        template = """
         Human: You are DevMate, a helpful developer onboarding assistant.
         
         User Profile:
@@ -45,15 +47,15 @@ def ask_devmate(question, role, exp, history=""):
         
         Use the following pieces of context to answer the question at the end.
         
-        Context: {{context}}
+        Context: {context}
         
-        Question: {{question}}
+        Question: {question}
         
         Assistant:"""
         
         PROMPT = PromptTemplate(
-            template=final_prompt_template,
-            input_variables=["context", "question"]
+            template=template,
+            input_variables=["context", "question", "role", "exp", "history"]
         )
         
         # Create Chain
@@ -66,7 +68,10 @@ def ask_devmate(question, role, exp, history=""):
         )
         
         # Run Chain
-        result = chain.invoke({"query": question})
+        # We need to pass the other variables in the validation dict too
+        result = chain.invoke(
+            {"query": question, "role": role, "exp": exp, "history": history}
+        )
         
         # Extract Answer and Sources
         answer = result['result']

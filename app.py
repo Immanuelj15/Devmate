@@ -263,9 +263,8 @@ with tab1:
             
         with cols[2]:
             # Send Button (Manual Trigger)
-            if st.button("➤", key="send_btn"):
-                st.session_state.user_submitted = st.session_state.widget_input
-                st.session_state.widget_input = ""
+            # Use on_click callback to safely clear state
+            st.button("➤", key="send_btn", on_click=submit)
 
     # Float the footer
     footer_container.float("bottom: 0rem; background-color: #0e1117; z-index: 1000;")
