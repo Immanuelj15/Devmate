@@ -11,3 +11,5 @@ pypdf
 gTTS
 SpeechRecognition
 GitPython
+streamlit-mic-recorder
+streamlit-float

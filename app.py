@@ -217,25 +217,80 @@ with tab1:
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
 
-    # Voice Input Option (Placed AFTER the chat container so it's below messages)
-    input_audio = st.audio_input("🎙️ Speak to DevMate")
+    # Custom CSS for Bottom Bar
+    from streamlit_float import float_init
+    from streamlit_mic_recorder import mic_recorder
+    import io
     
+    # Initialize float
+    float_init()
+
+    # Chat Logic Container
+    # We use a container for the footer to hold inputs
+    footer_container = st.container()
+    
+    # Logic variables
     user_input = None
     
-    if input_audio:
+    # Footer Content (Floating)
+    with footer_container:
+        # Style the container to look like a bar
+        st.markdown("""
+        <style>
+            div[data-testid="stVerticalBlock"] > div[data-testid="stHorizontalBlock"] {
+                background-color: #0e1117;
+                padding: 10px;
+                border-top: 1px solid #30363d;
+                border-radius: 10px;
+                align-items: center;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        cols = st.columns([12, 1, 1])
+        
+        with cols[0]:
+            # Text Input
+            def submit():
+                st.session_state.user_submitted = st.session_state.widget_input
+                st.session_state.widget_input = "" # Clear input
+            
+            st.text_input("Message", placeholder="Message DevMate...", key="widget_input", on_change=submit, label_visibility="collapsed")
+            
+        with cols[1]:
+            # Mic Button
+            audio = mic_recorder(start_prompt="🎤", stop_prompt="⏹️", key='recorder', format="wav")
+            
+        with cols[2]:
+            # Send Button (Manual Trigger)
+            if st.button("➤", key="send_btn"):
+                st.session_state.user_submitted = st.session_state.widget_input
+                st.session_state.widget_input = ""
+
+    # Float the footer
+    footer_container.float("bottom: 0rem; background-color: #0e1117; z-index: 1000;")
+
+    # Handle Inputs (Text or Audio)
+    if "user_submitted" in st.session_state and st.session_state.user_submitted:
+        user_input = st.session_state.user_submitted
+        st.session_state.user_submitted = None # Reset
+        
+    if audio:
         # Transcribe audio using speech_recognition
         import speech_recognition as sr
         r = sr.Recognizer()
         try:
-            with sr.AudioFile(input_audio) as source:
+             # mic_recorder returns dict with 'bytes'
+             audio_bytes = audio['bytes']
+             # SpeechRecognition needs a file-like object
+             audio_file = io.BytesIO(audio_bytes)
+             
+             with sr.AudioFile(audio_file) as source:
                 audio_data = r.record(source)
                 text = r.recognize_google(audio_data)
                 user_input = text
         except Exception as e:
-            st.warning(f"Could not understand audio: {e}")
-    
-    if prompt := st.chat_input("What would you like to know?"):
-            user_input = prompt
+            st.warning(f"Audio Error: {e}")
             
     if user_input:
         # Append new messages to the SAME container
