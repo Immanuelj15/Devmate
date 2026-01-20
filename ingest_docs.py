@@ -33,6 +33,9 @@ def ingest_docs():
                 elif file.endswith(".py"):
                     loader = TextLoader(file_path, encoding='utf-8')
                     documents.extend(loader.load())
+                elif file.endswith((".js", ".jsx", ".ts", ".tsx", ".html", ".css", ".json", ".java", ".cpp", ".c", ".h", ".go", ".rs", ".php", ".rb")):
+                     loader = TextLoader(file_path, encoding='utf-8')
+                     documents.extend(loader.load())
             except Exception as e:
                 print(f"Error loading {file}: {e}")
 
