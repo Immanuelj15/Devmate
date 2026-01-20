@@ -33,17 +33,21 @@ def ask_devmate(question, role, exp, history=""):
         retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
         
         # Create Prompt with Role/Experience + History context
-        # We use an f-string to bake in the metadata first, so the chain only sees 'context' and 'question'
+        # We use an f-string to bake in the metadata first.
+        # CRITICAL: We must escape curly braces in the inputs to prevent PromptTemplate from treating them as variables.
+        role_safe = role.replace("{", "{{").replace("}", "}}")
+        exp_safe = exp.replace("{", "{{").replace("}", "}}")
+        history_safe = history.replace("{", "{{").replace("}", "}}")
         
         template_str = f"""
         Human: You are DevMate, a helpful developer onboarding assistant.
         
         User Profile:
-        - Role: {role}
-        - Experience: {exp}
+        - Role: {role_safe}
+        - Experience: {exp_safe}
         
         Previous Conversation:
-        {history}
+        {history_safe}
         
         Use the following pieces of context to answer the question at the end.
         
