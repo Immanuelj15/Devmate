@@ -163,7 +163,13 @@ with st.sidebar:
                     clone_path = os.path.join("data", "repos", repo_name)
                     
                     if os.path.exists(clone_path):
-                        shutil.rmtree(clone_path)
+                        # Helper to remove read-only files (common in git repos on Windows)
+                        def on_rm_error(func, path, exc_info):
+                            import stat
+                            os.chmod(path, stat.S_IWRITE)
+                            func(path)
+                            
+                        shutil.rmtree(clone_path, onerror=on_rm_error)
                     
                     with st.spinner(f"Cloning {repo_name}..."):
                         git.Repo.clone_from(repo_url, clone_path)
