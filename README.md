@@ -2,6 +2,11 @@
 
 DevMate is an intelligent RAG (Retrieval-Augmented Generation) application designed to streamline the onboarding process for new developers. It uses **AWS Bedrock (Amazon Nova Lite)** to answer questions, explain code, and test knowledge based on your project's internal documentation.
 
+
+## 📺 Project Demo Video
+
+[▶️ Click here to watch the demo](PASTE_YOUR_VIDEO_LINK_HERE)
+
 ## 🎯 Problem Statement
 
 *   **The Problem**: New developers (interns/juniors) often struggle to understand complex codebases. They spend hours reading outdated documentation or waiting for senior developers to answer basic questions, which kills productivity.
