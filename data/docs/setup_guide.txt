@@ -1,0 +1,5 @@
+Install Node.js
+Install MongoDB
+Run backend: npm start
+Run frontend: npm start
+Open http://localhost:3000
