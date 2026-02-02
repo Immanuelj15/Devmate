@@ -1,5 +1,0 @@
-git
-portaudio19-dev
-libasound2-dev
-libportaudio2
-ffmpeg

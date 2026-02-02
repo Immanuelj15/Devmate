@@ -9,7 +9,6 @@ faiss-cpu
 python-dotenv
 pypdf
 gTTS
-SpeechRecognition
 GitPython
 streamlit-mic-recorder
 streamlit-float

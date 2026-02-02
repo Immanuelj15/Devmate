@@ -330,21 +330,11 @@ with tab1:
         st.session_state.user_submitted = None # Reset
         
     if audio:
-        # Transcribe audio using speech_recognition
-        import speech_recognition as sr
-        r = sr.Recognizer()
-        try:
-             # mic_recorder returns dict with 'bytes'
-             audio_bytes = audio['bytes']
-             # SpeechRecognition needs a file-like object
-             audio_file = io.BytesIO(audio_bytes)
-             
-             with sr.AudioFile(audio_file) as source:
-                audio_data = r.record(source)
-                text = r.recognize_google(audio_data)
-                user_input = text
-        except Exception as e:
-            st.warning(f"Audio Error: {e}")
+        st.info("ℹ️ Voice transcription is temporarily disabled on the shared Cloud Demo to improve performance. Please use the Text Input above!")
+        # Transcription disabled to fix Cloud 151 Timeout Error
+        # import speech_recognition as sr
+        # r = sr.Recognizer()
+        # ... logic removed for stability
             
     if user_input:
         # Append new messages to the SAME container
