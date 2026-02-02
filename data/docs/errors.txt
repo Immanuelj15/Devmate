@@ -1,2 +1,0 @@
-Port already in use → change PORT
-Mongo not running → start MongoDB
